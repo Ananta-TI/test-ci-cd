@@ -1,73 +1,67 @@
 /* eslint-disable react-refresh/only-export-components */
 
-import { createContext, useContext, useMemo, useState, useCallback } from 'react'
+import { createContext, useContext, useMemo, useState, useCallback, useEffect } from 'react'
+import { api } from '../lib/api'
 
 const AuthContext = createContext(null)
 
-const USERS_KEY = 'cicd-users'
-const SESSION_KEY = 'cicd-session'
+const TOKEN_KEY = 'cicd-token'
 
-function getUsers() {
+async function checkSession() {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (!token) return null
   try {
-    return JSON.parse(localStorage.getItem(USERS_KEY)) || []
+    const data = await api.me()
+    return data.user
   } catch {
-    return []
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
-
-function getSession() {
-  try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY)) || null
-  } catch {
+    localStorage.removeItem(TOKEN_KEY)
     return null
   }
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(getSession)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = useCallback((email, password) => {
-    const users = getUsers()
-    const found = users.find((u) => u.email === email && u.password === password)
-    if (!found) return { success: false, message: 'Email atau password salah' }
-
-    const session = { id: found.id, name: found.name, email: found.email }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    setUser(session)
-    return { success: true }
+  useEffect(() => {
+    let cancelled = false
+    checkSession().then((u) => {
+      if (!cancelled) {
+        setUser(u)
+        setLoading(false)
+      }
+    })
+    return () => { cancelled = true }
   }, [])
 
-  const register = useCallback((name, email, password) => {
-    const users = getUsers()
-    if (users.find((u) => u.email === email)) {
-      return { success: false, message: 'Email sudah terdaftar' }
+  const login = useCallback(async (email, password) => {
+    try {
+      const data = await api.login({ email, password })
+      localStorage.setItem(TOKEN_KEY, data.token)
+      setUser(data.user)
+      return { success: true }
+    } catch (err) {
+      return { success: false, message: err.message }
     }
+  }, [])
 
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password,
+  const register = useCallback(async (name, email, password) => {
+    try {
+      const data = await api.register({ name, email, password })
+      localStorage.setItem(TOKEN_KEY, data.token)
+      setUser(data.user)
+      return { success: true }
+    } catch (err) {
+      return { success: false, message: err.message }
     }
-    users.push(newUser)
-    saveUsers(users)
-
-    const session = { id: newUser.id, name: newUser.name, email: newUser.email }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    setUser(session)
-    return { success: true }
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY)
+    localStorage.removeItem(TOKEN_KEY)
     setUser(null)
   }, [])
 
-  const value = useMemo(() => ({ user, login, register, logout }), [user, login, register, logout])
+  const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading, login, register, logout])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
+import { useLanding } from '../context/LandingContext'
 import { cn } from '../lib/utils'
 
 const SunIcon = () => (
@@ -20,8 +21,11 @@ const MoonIcon = () => (
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const { user, logout } = useAuth()
+  const { landing } = useLanding()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+
+  const navLinks = landing.navbar.links
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -51,14 +55,11 @@ export default function Navbar() {
         <nav className="relative mx-auto flex h-16 w-full max-w-[1240px] items-center justify-between px-5 md:px-6">
           <a href="/" className="flex items-center gap-2.5" aria-label="Lancar beranda">
             <img src="/logo.png" alt="" className="h-7 w-7" />
-            <span className="text-[15px] font-semibold tracking-[-0.02em]">Lancar CI/CD</span>
+            <span className="text-[15px] font-semibold tracking-[-0.02em]">{landing.navbar.brand}</span>
           </a>
 
           <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
-            {[
-              { label: 'Fitur', href: '#fitur' },
-              { label: 'Cara Kerja', href: '#cara-kerja' },
-            ].map((l) => (
+            {navLinks.map((l) => (
               <li key={l.href}>
                 <a
                   href={l.href}
@@ -93,7 +94,7 @@ export default function Navbar() {
             <div className="hidden items-center gap-2 sm:flex">
               {user ? (
                 <>
-                  <a href="/dashboard" className="btn btn--nav btn--nav--ghost">
+                  <a href="#/dashboard" className="btn btn--nav btn--nav--ghost">
                     Dashboard
                   </a>
                   <button onClick={logout} className="btn btn--nav btn--nav--primary">
@@ -102,10 +103,10 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <a href="/login" className="btn btn--nav btn--nav--ghost">
+                  <a href="#/login" className="btn btn--nav btn--nav--ghost">
                     Masuk
                   </a>
-                  <a href="/register" className="btn btn--nav btn--nav--primary">
+                  <a href="#/register" className="btn btn--nav btn--nav--primary">
                     Daftar
                   </a>
                 </>
@@ -135,7 +136,7 @@ export default function Navbar() {
             className="fixed inset-0 z-[60] flex flex-col bg-canvas"
           >
             <div className="flex h-16 items-center justify-between border-b border-line px-5">
-              <span className="text-[15px] font-semibold tracking-[-0.02em]">Lancar CI/CD</span>
+              <span className="text-[15px] font-semibold tracking-[-0.02em]">{landing.navbar.brand}</span>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Tutup menu"
@@ -148,10 +149,7 @@ export default function Navbar() {
             </div>
 
             <nav className="flex flex-1 flex-col items-center justify-center gap-1 px-6">
-              {[
-                { label: 'Fitur', href: '#fitur' },
-                { label: 'Cara Kerja', href: '#cara-kerja' },
-              ].map((l, i) => (
+              {navLinks.map((l, i) => (
                 <motion.a
                   key={l.href}
                   href={l.href}
@@ -168,7 +166,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <motion.a
-                    href="/dashboard"
+                    href="#/dashboard"
                     onClick={() => setOpen(false)}
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -190,7 +188,7 @@ export default function Navbar() {
               ) : (
                 <>
                   <motion.a
-                    href="/login"
+                    href="#/login"
                     onClick={() => setOpen(false)}
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -200,7 +198,7 @@ export default function Navbar() {
                     Masuk
                   </motion.a>
                   <motion.a
-                    href="/register"
+                    href="#/register"
                     onClick={() => setOpen(false)}
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}

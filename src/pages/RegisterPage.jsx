@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-export default function RegisterPage({ onSwitch }) {
+export default function RegisterPage({ onSwitch, onLoginSuccess }) {
   const { register } = useAuth()
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -20,8 +21,14 @@ export default function RegisterPage({ onSwitch }) {
       return
     }
 
-    const result = register(form.name, form.email, form.password)
-    if (!result.success) setError(result.message)
+    setLoading(true)
+    const result = await register(form.name, form.email, form.password)
+    setLoading(false)
+    if (result.success) {
+      onLoginSuccess()
+    } else {
+      setError(result.message)
+    }
   }
 
   return (
@@ -90,9 +97,10 @@ export default function RegisterPage({ onSwitch }) {
 
             <button
               type="submit"
-              className="btn btn--primary w-full"
+              disabled={loading}
+              className="btn btn--primary w-full disabled:opacity-50"
             >
-              Daftar
+              {loading ? 'Mendaftar...' : 'Daftar'}
             </button>
           </form>
 

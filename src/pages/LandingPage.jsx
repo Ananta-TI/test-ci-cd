@@ -1,82 +1,52 @@
 import { useAuth } from '../context/AuthContext'
+import { useLanding } from '../context/LandingContext'
 
-const features = [
-  {
-    icon: '🚀',
-    title: 'Deploy Instan',
-    desc: 'Push ke repository dan langsung ter-deploy. Tanpa konfigurasi rumit.',
-  },
-  {
-    icon: '🔒',
-    title: 'Keamanan Terjamin',
-    desc: 'Autentikasi terintegrasi dengan enkripsi data end-to-end.',
-  },
-  {
-    icon: '📊',
-    title: 'Monitoring Real-time',
-    desc: 'Pantau performa aplikasi dan pipeline CI/CD secara langsung.',
-  },
-  {
-    icon: '🔄',
-    title: 'Auto Scaling',
-    desc: 'Infrastructure menyesuaikan otomatis sesuai kebutuhan traffic.',
-  },
-  {
-    icon: '🌐',
-    title: 'Global CDN',
-    desc: 'Akses cepat dari mana saja dengan distribusi konten global.',
-  },
-  {
-    icon: '💡',
-    title: 'Developer Friendly',
-    desc: 'Tooling modern yang dirancang untuk produktivitas developer.',
-  },
-]
-
-const steps = [
-  { num: '01', title: 'Connect Repository', desc: 'Hubungkan repository GitHub atau GitLab kamu' },
-  { num: '02', title: 'Configure Pipeline', desc: 'Atur workflow CI/CD sesuai kebutuhan project' },
-  { num: '03', title: 'Deploy & Monitor', desc: 'Push kode dan pantau deployment secara real-time' },
-]
+function GradientText({ text }) {
+  const parts = text.split(/<gradient>(.*?)<\/gradient>/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <span key={i} className="display-gradient">{part}</span> : part
+  )
+}
 
 export default function LandingPage() {
   const { user } = useAuth()
+  const { landing } = useLanding()
+  const { hero, features, steps, cta } = landing
 
   return (
     <>
       {/* Hero Section */}
       <section className="relative min-h-svh flex items-center justify-center overflow-hidden">
         <div className="mesh" aria-hidden />
-        
+
         <div className="container-x relative z-10 text-center py-20">
           <div className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas/80 px-4 py-1.5 text-sm text-body backdrop-blur-sm mb-6">
             <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-            Pipeline CI/CD sedang aktif
+            {hero.badge}
           </div>
 
           <h1 className="display text-[clamp(40px,6vw,72px)] max-w-4xl mx-auto">
-            Platform <span className="display-gradient">CI/CD Modern</span> untuk Developer
+            <GradientText text={hero.title} />
           </h1>
 
           <p className="mt-6 max-w-2xl mx-auto text-lg text-body leading-relaxed">
-            Bangun, test, dan deploy aplikasi kamu dengan mudah. Integrasi seamless dengan GitHub Actions, 
-            Docker, dan infrastructure cloud modern.
+            {hero.description}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             {user ? (
-              <a href="/dashboard" className="btn btn--primary">
+              <a href="#/dashboard" className="btn btn--primary">
                 Buka Dashboard
                 <span aria-hidden>→</span>
               </a>
             ) : (
               <>
-                <a href="/login" className="btn btn--primary">
-                  Mulai Sekarang
+                <a href={hero.ctaPrimary.href} className="btn btn--primary">
+                  {hero.ctaPrimary.label}
                   <span aria-hidden>→</span>
                 </a>
-                <a href="#fitur" className="btn btn--ghost">
-                  Pelajari Lebih Lanjut
+                <a href={hero.ctaSecondary.href} className="btn btn--ghost">
+                  {hero.ctaSecondary.label}
                 </a>
               </>
             )}
@@ -84,11 +54,7 @@ export default function LandingPage() {
 
           {/* Stats */}
           <div className="mt-16 flex flex-wrap items-center justify-center gap-12">
-            {[
-              { value: '99.9%', label: 'Uptime' },
-              { value: '< 30s', label: 'Deploy Time' },
-              { value: '10k+', label: 'Developers' },
-            ].map((stat) => (
+            {hero.stats.map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="display text-3xl">{stat.value}</div>
                 <div className="mt-1 text-sm text-body">{stat.label}</div>
@@ -102,17 +68,17 @@ export default function LandingPage() {
       <section id="fitur" className="section">
         <div className="container-x">
           <div className="text-center mb-16">
-            <span className="eyebrow">Fitur Unggulan</span>
+            <span className="eyebrow">{features.eyebrow}</span>
             <h2 className="display mt-4 text-[clamp(28px,4vw,48px)]">
-              Semua yang kamu butuhkan untuk <span className="display-gradient">deploy</span>
+              <GradientText text={features.title} />
             </h2>
             <p className="mt-4 max-w-xl mx-auto text-body">
-              Solusi lengkap untuk pipeline CI/CD modern yang powerful namun sederhana.
+              {features.description}
             </p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
+            {features.items.map((f) => (
               <div key={f.title} className="glass group p-6 transition-all hover:shadow-float hover:-translate-y-1">
                 <div className="text-3xl mb-4">{f.icon}</div>
                 <h3 className="text-lg font-semibold text-ink">{f.title}</h3>
@@ -127,14 +93,14 @@ export default function LandingPage() {
       <section id="cara-kerja" className="section band-dark">
         <div className="container-x">
           <div className="text-center mb-16">
-            <span className="eyebrow">Cara Kerja</span>
+            <span className="eyebrow">{steps.eyebrow}</span>
             <h2 className="display mt-4 text-[clamp(28px,4vw,48px)]">
-              Tiga langkah sederhana
+              {steps.title}
             </h2>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {steps.map((step) => (
+            {steps.items.map((step) => (
               <div key={step.num} className="text-center">
                 <div className="display text-6xl text-on-primary/20">{step.num}</div>
                 <h3 className="mt-4 text-xl font-semibold text-on-primary">{step.title}</h3>
@@ -149,19 +115,19 @@ export default function LandingPage() {
       <section className="section">
         <div className="container-x text-center">
           <h2 className="display text-[clamp(28px,4vw,48px)]">
-            Siap memulai?
+            {cta.title}
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-body">
-            Bergabung dengan ribuan developer yang sudah menggunakan platform kami untuk pipeline CI/CD mereka.
+            {cta.description}
           </p>
           <div className="mt-8">
             {user ? (
-              <a href="/dashboard" className="btn btn--primary">
+              <a href="#/dashboard" className="btn btn--primary">
                 Buka Dashboard →
               </a>
             ) : (
-              <a href="/register" className="btn btn--primary">
-                Daftar Gratis →
+              <a href={cta.button.href} className="btn btn--primary">
+                {cta.button.label} →
               </a>
             )}
           </div>

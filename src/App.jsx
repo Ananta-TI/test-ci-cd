@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { LandingProvider } from './context/LandingContext'
 import MainLayout from './layouts/MainLayout'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -8,48 +9,61 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import './App.css'
 
-function Navigate({ to }) {
+function Redirect({ to }) {
   useEffect(() => {
-    window.location.hash = to
+    window.location.replace(to)
   }, [to])
   return null
 }
 
 function Router() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const [route, setRoute] = useState(() => window.location.hash || '#/')
 
   useEffect(() => {
-    const handleHash = () => setRoute(window.location.hash || '#/')
-    window.addEventListener('hashchange', handleHash)
-    return () => window.removeEventListener('hashchange', handleHash)
+    const onHashChange = () => setRoute(window.location.hash || '#/')
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  // Redirect logged-in users from auth pages
-  if ((route === '#/login' || route === '#/register') && user) {
-    return <Navigate to="#/dashboard" />
+  if (loading) {
+    return (
+      <div className="min-h-svh flex items-center justify-center bg-bg">
+        <div className="text-body">Memuat...</div>
+      </div>
+    )
   }
 
-  // Redirect non-logged-in users from dashboard
   if (route === '#/dashboard' && !user) {
-    return <Navigate to="#/login" />
+    return <Redirect to="#/login" />
   }
 
-  // Auth pages (no layout)
+  if ((route === '#/login' || route === '#/register') && user) {
+    return <Redirect to="#/dashboard" />
+  }
+
   if (route === '#/login') {
-    return <LoginPage onSwitch={() => { window.location.hash = '#/register' }} />
+    return (
+      <LoginPage
+        onSwitch={() => { window.location.hash = '#/register' }}
+        onLoginSuccess={() => { window.location.hash = '#/dashboard' }}
+      />
+    )
   }
 
   if (route === '#/register') {
-    return <RegisterPage onSwitch={() => { window.location.hash = '#/login' }} />
+    return (
+      <RegisterPage
+        onSwitch={() => { window.location.hash = '#/login' }}
+        onLoginSuccess={() => { window.location.hash = '#/dashboard' }}
+      />
+    )
   }
 
-  // Dashboard (protected)
   if (route === '#/dashboard') {
     return <DashboardPage />
   }
 
-  // Default: Landing page
   return (
     <MainLayout>
       <LandingPage />
@@ -61,7 +75,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router />
+        <LandingProvider>
+          <Router />
+        </LandingProvider>
       </AuthProvider>
     </ThemeProvider>
   )

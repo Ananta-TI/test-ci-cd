@@ -1,16 +1,23 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-export default function LoginPage({ onSwitch }) {
+export default function LoginPage({ onSwitch, onLoginSuccess }) {
   const { login } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    const result = login(form.email, form.password)
-    if (!result.success) setError(result.message)
+    setLoading(true)
+    const result = await login(form.email, form.password)
+    setLoading(false)
+    if (result.success) {
+      onLoginSuccess()
+    } else {
+      setError(result.message)
+    }
   }
 
   return (
@@ -55,9 +62,10 @@ export default function LoginPage({ onSwitch }) {
 
             <button
               type="submit"
-              className="btn btn--primary w-full"
+              disabled={loading}
+              className="btn btn--primary w-full disabled:opacity-50"
             >
-              Masuk
+              {loading ? 'Masuk...' : 'Masuk'}
             </button>
           </form>
 

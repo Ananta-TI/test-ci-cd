@@ -1,7 +1,10 @@
-import { footer } from '../data/content'
+import { useLanding } from '../context/LandingContext'
 import { Reveal } from './MotionSystem'
 
 export default function Footer() {
+  const { landing } = useLanding()
+  const { footer } = landing
+
   return (
     <footer className="relative overflow-hidden border-t border-line">
       <div className="container-x pb-10 pt-20">
@@ -41,7 +44,7 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-5 pt-8 text-sm text-faint sm:flex-row">
           <span>{footer.bottom}</span>
           <div className="flex items-center gap-3">
-            <span className="text-xs">Dibuat di Bandung dengan</span>
+            <span className="text-xs">Dibuat di {footer.location} dengan</span>
             <span className="text-accent" aria-hidden>♥</span>
           </div>
         </div>
