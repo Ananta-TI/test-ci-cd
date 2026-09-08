@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Rina Kusuma",
+    "role": "Pemilik toko Batik, Solo",
+    "location": "Solo",
+    "rating": 5,
+    "text": "Dulu ongkir selalu jadi teka-teki di akhir bulan. Sekarang semua terlihat sejak awal, dan resi tinggal dicetak. Pelanggan pun makin percaya karena bisa lihat posisi paketnya."
+  },
+  {
+    "id": 2,
+    "name": "Dimas Prasetyo",
+    "role": "Pemilik kedai kopi, Bandung",
+    "location": "Bandung",
+    "rating": 5,
+    "text": "Kurirnya jemput ke toko, jadi saya nggak pernah antre di kantor ekspedisi lagi. Yang paling terasa: keluhan paket hilang turun drastis."
+  },
+  {
+    "id": 3,
+    "name": "Sari Wulandari",
+    "role": "Penjual kerajinan, Yogyakarta",
+    "location": "Yogyakarta",
+    "rating": 4,
+    "text": "Integrasi marketplace-nya rapi banget. Ongkir dibebankan ke pembeli otomatis, saya tinggal packing. Klaim asuransi pernah saya pakai sekali — cair dalam sehari."
+  },
+  {
+    "id": 4,
+    "name": "Andi Saputra",
+    "role": "Distributor frozen food, Makassar",
+    "location": "Makassar",
+    "rating": 5,
+    "text": "Kiriman dingin butuh kecepatan dan penanganan khusus. Pelacakan real-time-nya membantu saya meyakinkan pelanggan bahwa pesanan mereka aman di perjalanan."
+  },
+  {
+    "id": 5,
+    "name": "Maya Angelina",
+    "role": "Owner online shop fashion, Jakarta",
+    "location": "Jakarta",
+    "rating": 5,
+    "text": "Cetak resi massal menghemat waktu saya berjam-jam setiap minggu. Laporan bulanannya juga jadi bahan evaluasi ekspedisi mana yang paling andal."
+  },
+  {
+    "id": 6,
+    "name": "Bayu Aji",
+    "role": "Petani kopi, Kintamani",
+    "location": "Bali",
+    "rating": 5,
+    "text": "Dari desa, kiriman saya bisa sampai ke Jakarta utuh. Kurir lokal di sini sudah kenal saya, dan bantuan pelanggannya beneran dijawab manusia."
+  }
+]

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lancar — Stats</title>
+    <style>
+      :root {
+        --bg: #fafafa;
+        --ink: #171717;
+        --muted: #4d4d4d;
+        --faint: #888888;
+        --accent: #0070f3;
+        --violet: #7928ca;
+        --line: #ebebeb;
+        --surface: #ffffff;
+        --surface-strong: #f5f5f5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Satoshi Variable', 'Inter', system-ui, -apple-system, sans-serif;
+        background: radial-gradient(900px 420px at 50% -8%, rgba(0, 124, 240, 0.1), transparent 60%), var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 48px clamp(20px, 5vw, 64px);
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 1080px; margin: 0 auto; }
+      header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+      .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+      .eyebrow::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 1.8s ease-in-out infinite; }
+      @keyframes pulse { 50% { transform: scale(1.5); opacity: .5; } }
+      h1 { font-size: clamp(30px, 4.5vw, 48px); font-weight: 600; letter-spacing: -0.045em; line-height: 1; margin: 10px 0 0; }
+      .sub { color: var(--muted); font-size: 14px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+      .card {        background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.05); }
+      .card .label { font-size: 12px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.16em; }
+      .card .value { font-size: 44px; font-weight: 600; letter-spacing: -0.04em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+      .card .value small { font-size: 20px; color: var(--accent); }
+      .card .delta { font-size: 12px; color: var(--accent); margin-top: 6px; }
+      .wide { grid-column: 1 / -1; }
+      .bars { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
+      .bar-row { display: grid; grid-template-columns: 120px 1fr 64px; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); }
+      .bar-track { height: 10px; border-radius: 999px; background: var(--surface-strong); overflow: hidden; }
+      .bar-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #007cf0, #00dfd8); transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1); }
+      .bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+      .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+      .pill { font-size: 12px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
+      .pill.green { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+      footer { margin-top: 48px; color: var(--faint); font-size: 12px; text-align: center; }
+      footer a { color: var(--muted); }
+      @media (max-width: 640px) { .bar-row { grid-template-columns: 1fr 64px; } .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <span class="eyebrow">Dashboard operasional</span>
+          <h1>Lancar — Stats</h1>
+          <div class="sub">Ringkasan pipeline pengiriman · pembaruan live tiap 30 detik</div>
+        </div>
+        <a class="pill green" href="./">← kembali ke beranda</a>
+      </header>
+
+      <div class="grid">
+        <div class="card">
+          <div class="label">Paket terkirim (30 hari)</div>
+          <div class="value" data-count="284713" data-format="id">0<small>+</small></div>
+          <div class="delta">▲ 12,4% vs bulan lalu</div>
+        </div>
+        <div class="card">
+          <div class="label">Tepat waktu</div>
+          <div class="value" data-count="98.6" data-decimals="1">0<small>%</small></div>
+          <div class="delta">▲ 0,3 poin</div>
+        </div>
+        <div class="card">
+          <div class="label">Ekspedisi aktif</div>
+          <div class="value" data-count="47">0</div>
+          <div class="delta">3 kota baru minggu ini</div>
+        </div>
+        <div class="card">
+          <div class="label">Klaim dibayar (30 hari)</div>
+          <div class="value" data-count="312">0</div>
+          <div class="delta">▼ 18% — terus menurun</div>
+        </div>
+
+        <div class="card wide">
+          <div class="label">Rute terlaris</div>
+          <div class="bars" id="bars">
+            <div class="bar-row"><span>Jakarta → Surabaya</span><div class="bar-track"><div class="bar-fill" data-w="92"></div></div><span class="bar-val">92%</span></div>
+            <div class="bar-row"><span>Bandung → Jakarta</span><div class="bar-track"><div class="bar-fill" data-w="84"></div></div><span class="bar-val">84%</span></div>
+            <div class="bar-row"><span>Jakarta → Medan</span><div class="bar-track"><div class="bar-fill" data-w="71"></div></div><span class="bar-val">71%</span></div>
+            <div class="bar-row"><span>Makassar → Jakarta</span><div class="bar-track"><div class="bar-fill" data-w="58"></div></div><span class="bar-val">58%</span></div>
+            <div class="bar-row"><span>Yogyakarta → Bali</span><div class="bar-track"><div class="bar-fill" data-w="49"></div></div><span class="bar-val">49%</span></div>
+          </div>
+          <div class="pills">
+            <span class="pill green">● 200+ kota</span>
+            <span class="pill">40+ ekspedisi terhubung</span>
+            <span class="pill">SLA 98,6%</span>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Data contoh untuk keperluan demo · <a href="./">Lancar</a> · dibuat dengan CSS + JS murni, tanpa build
+      </footer>
+    </div>
+
+    <script>
+      // Counter
+      document.querySelectorAll('[data-count]').forEach(function (el) {
+        var target = parseFloat(el.dataset.count)
+        var decimals = parseInt(el.dataset.decimals || '0', 10)
+        var dur = 1400
+        var t0 = null
+        function step(ts) {
+          if (!t0) t0 = ts
+          var p = Math.min((ts - t0) / dur, 1)
+          var eased = 1 - Math.pow(1 - p, 4)
+          var v = target * eased
+          var txt = decimals
+            ? v.toFixed(decimals).replace('.', ',')
+            : Math.round(v).toLocaleString('id-ID')
+          el.firstChild.nodeValue = txt
+          if (p < 1) requestAnimationFrame(step)
+        }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) { requestAnimationFrame(step); io.disconnect() } })
+        }, { threshold: 0.4 })
+        io.observe(el)
+      })
+
+      // Bars
+      var barIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return
+          e.target.style.width = e.target.dataset.w + '%'
+          barIO.unobserve(e.target)
+        })
+      }, { threshold: 0.4 })
+      document.querySelectorAll('.bar-fill').forEach(function (b) { barIO.observe(b) })
+    </script>
+  </body>
+</html>
