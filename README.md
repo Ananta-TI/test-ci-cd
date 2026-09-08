@@ -73,3 +73,5 @@ Berjalan pada push/PR ke `main`. Satu job `docker`:
     ├── App.jsx          # Halaman utama
     └── main.jsx         # Entry point React
 ```
+
+> Last updated: 2026
