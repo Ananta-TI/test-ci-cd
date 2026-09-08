@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { brand, navLinks } from '../data/content'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 import { cn } from '../lib/utils'
 
 const SunIcon = () => (
@@ -19,6 +19,7 @@ const MoonIcon = () => (
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme()
+  const { user, logout } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -48,13 +49,16 @@ export default function Navbar() {
         )}
       >
         <nav className="relative mx-auto flex h-16 w-full max-w-[1240px] items-center justify-between px-5 md:px-6">
-          <a href="#beranda" className="flex items-center gap-2.5" aria-label="Lancar beranda">
-            <img src={brand.logo} alt="" className="h-7 w-7" />
-            <span className="text-[15px] font-semibold tracking-[-0.02em]">{brand.name}</span>
+          <a href="/" className="flex items-center gap-2.5" aria-label="Lancar beranda">
+            <img src="/logo.png" alt="" className="h-7 w-7" />
+            <span className="text-[15px] font-semibold tracking-[-0.02em]">Lancar CI/CD</span>
           </a>
 
           <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
-            {navLinks.map((l) => (
+            {[
+              { label: 'Fitur', href: '#fitur' },
+              { label: 'Cara Kerja', href: '#cara-kerja' },
+            ].map((l) => (
               <li key={l.href}>
                 <a
                   href={l.href}
@@ -87,12 +91,25 @@ export default function Navbar() {
             </button>
 
             <div className="hidden items-center gap-2 sm:flex">
-              <a href="#lacak" className="btn btn--nav btn--nav--ghost">
-                Masuk
-              </a>
-              <a href="#unduh" className="btn btn--nav btn--nav--primary">
-                Daftar
-              </a>
+              {user ? (
+                <>
+                  <a href="/dashboard" className="btn btn--nav btn--nav--ghost">
+                    Dashboard
+                  </a>
+                  <button onClick={logout} className="btn btn--nav btn--nav--primary">
+                    Keluar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <a href="/login" className="btn btn--nav btn--nav--ghost">
+                    Masuk
+                  </a>
+                  <a href="/register" className="btn btn--nav btn--nav--primary">
+                    Daftar
+                  </a>
+                </>
+              )}
             </div>
 
             <button
@@ -118,7 +135,7 @@ export default function Navbar() {
             className="fixed inset-0 z-[60] flex flex-col bg-canvas"
           >
             <div className="flex h-16 items-center justify-between border-b border-line px-5">
-              <span className="text-[15px] font-semibold tracking-[-0.02em]">{brand.name}</span>
+              <span className="text-[15px] font-semibold tracking-[-0.02em]">Lancar CI/CD</span>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Tutup menu"
@@ -131,7 +148,10 @@ export default function Navbar() {
             </div>
 
             <nav className="flex flex-1 flex-col items-center justify-center gap-1 px-6">
-              {navLinks.map((l, i) => (
+              {[
+                { label: 'Fitur', href: '#fitur' },
+                { label: 'Cara Kerja', href: '#cara-kerja' },
+              ].map((l, i) => (
                 <motion.a
                   key={l.href}
                   href={l.href}
@@ -145,16 +165,52 @@ export default function Navbar() {
                   {l.label}
                 </motion.a>
               ))}
-              <motion.a
-                href="#unduh"
-                onClick={() => setOpen(false)}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="btn btn--primary mt-6"
-              >
-                Daftar — unduh aplikasi
-              </motion.a>
+              {user ? (
+                <>
+                  <motion.a
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="btn btn--primary mt-6"
+                  >
+                    Dashboard
+                  </motion.a>
+                  <motion.button
+                    onClick={() => { logout(); setOpen(false) }}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="btn btn--ghost mt-2"
+                  >
+                    Keluar
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <motion.a
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="btn btn--ghost mt-6"
+                  >
+                    Masuk
+                  </motion.a>
+                  <motion.a
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="btn btn--primary mt-2"
+                  >
+                    Daftar
+                  </motion.a>
+                </>
+              )}
             </nav>
           </motion.div>
         )}
