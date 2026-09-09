@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cicd-react
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node server/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cicd-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: cicd-db
+    plan: free
+    databaseName: cicd_auth

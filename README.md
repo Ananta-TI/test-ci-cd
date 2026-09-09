@@ -1,30 +1,32 @@
-# cicd-react
+# Lancar CI/CD
 
-Aplikasi web React minimal yang dibuat khusus sebagai **latihan CI/CD**. Proyek ini sengaja dibuat sesederhana mungkin — hanya satu halaman statis — supaya fokus utamanya ada pada pipeline build, test, dan deployment.
+Full-stack app: landing page CMS + USB scanner (RFID/barcode) untuk latihan CI/CD.
 
-[![GitLab CI](https://gitlab.com/ananta-ti/test-ci-cd/badges/main/pipeline.svg)](https://gitlab.com/ananta-ti/test-ci-cd/pipelines)
-[![GitHub Actions CI/CD](https://github.com/Ananta-TI/test-ci-cd/actions/workflows/ci.yml/badge.svg)](https://github.com/Ananta-TI/test-ci-cd/actions/workflows/ci.yml)
-[![GitHub Actions Docker](https://github.com/Ananta-TI/test-ci-cd/actions/workflows/docker.yml/badge.svg)](https://github.com/Ananta-TI/test-ci-cd/actions/workflows/docker.yml)
+- **Frontend**: React 19 + Vite + Tailwind 4 (hash routing)
+- **Backend**: Express + PostgreSQL (auth JWT, konten landing, data scanner)
+- **Deploy**: Vercel (serverless), Render (web + Postgres), Docker
 
-## Teknologi
-
-- [React](https://react.dev) 19
-- [Vite](https://vitejs.dev) 8
-- [NGINX](https://nginx.org) (untuk serving hasil build di Docker)
-- ESLint 10
-
-## Menjalankan Secara Lokal
+## Menjalankan di Lokal
 
 ```bash
-npm install     # install dependencies
-npm run dev     # dev server dengan HMR (http://localhost:5173)
-npm run build   # build ke folder dist/
-npm run lint    # jalankan ESLint
-npm run preview # pratinjau hasil build (http://localhost:4173)
+npm install          # install dependencies (frontend + backend digabung di root)
+
+npm run dev:api      # terminal 1: Express API di http://localhost:3000
+npm run dev          # terminal 2: Vite dev server di http://localhost:5173
 ```
 
-t
+Vite sudah dikonfigurasi mem-proxy `/api/*` ke Express, jadi login, CMS, dan
+scanner langsung berfungsi tanpa build.
 
+> Butuh Postgres. Salin `.env.example` ke `server/.env` lalu sesuaikan koneksi,
+> atau pakai `docker compose up db` untuk Postgres di localhost.
+
+### Build produksi lokal
+
+```bash
+npm run build        # build frontend ke dist/
+npm start            # Express menyajikan API + dist/ di http://localhost:3000
+```
 
 ## Menjalankan dengan Docker
 
@@ -32,49 +34,49 @@ t
 docker compose up --build
 ```
 
-Container `test-ci-cd` akan berjalan di **http://localhost:8080** (NGINX menyajikan file statis dari hasil build). `nginx.conf` mengonfigurasi fallback SPA ke `index.html`, dan `vite.config.js` menggunakan `base: './'` agar aset memakai path relatif (cocok untuk deployment GitHub Pages).
+Aplikasi (frontend + API) berjalan di **http://localhost:8080**, Postgres di
+localhost:5432. Skema database dibuat otomatis saat start.
 
-## Pipeline CI/CD
+## Deploy ke Vercel
 
-Proyek ini memiliki **tiga pipeline** terpisah untuk latihan:
+1. Import repository ke Vercel (deteksi otomatis, tanpa setting tambahan).
+2. Tambahkan environment variable:
+   - `DATABASE_URL` — connection string Postgres (Neon/Supabase/Vercel Postgres)
+   - `JWT_SECRET` — secret untuk token login
 
-### 1. GitLab CI (`.gitlab-ci.yml`)
+API berjalan sebagai Vercel Function (`api/index.js`); semua request `/api/*`
+di-rewrite ke sana oleh `vercel.json`, sisanya di-fallback ke `index.html` (SPA).
 
-Pipeline GitLab paling sederhana, memakai image `node:22` dengan dua stage:
+## Deploy ke Render
 
-| Stage | Script |
-|---|---|
-| `install` | `npm ci` |
-| `build` | `npm run build` |
+`render.yaml` sudah berisi blueprint: web service (Node) + Postgres gratis.
+Environment `DATABASE_URL` dan `JWT_SECRET` dikonfigurasi otomatis.
 
-### 2. GitHub Actions — CI/CD (`.github/workflows/ci.yml`)
+## Pipeline CI
 
-Berjalan pada push/PR ke `main`. Dua job:
-
-- **`build`** — setup Node.js 20, `npm ci`, `npm run build`, lalu mengunggah folder `dist/` sebagai artifact Pages.
-- **`deploy`** (membutuhkan `build`) — deploy otomatis hasil build ke **GitHub Pages** menggunakan `actions/deploy-pages`.
-
-### 3. GitHub Actions — Docker (`.github/workflows/docker.yml`)
-
-Berjalan pada push/PR ke `main`. Satu job `docker`:
-
-- Login ke **GitHub Container Registry (GHCR)** dengan `GITHUB_TOKEN`.
-- Build image Docker (multi-stage: build dengan `node:20-alpine`, serve dengan `nginx:alpine`).
-- Push image ke **`ghcr.io/ananta-ti/cicd-react:latest`**.
+- **GitHub Actions** (`.github/workflows/ci.yml`) — lint + syntax check server + build pada push/PR ke `main`. Docker image di-push ke GHCR oleh `docker.yml`.
+- **GitLab CI** (`.gitlab-ci.yml`) — stage `lint` dan `build` (artifact `dist/`).
 
 ## Struktur Proyek
 
 ```
 .
-├── .github/workflows/   # GitHub Actions: ci.yml (Pages) & docker.yml (GHCR)
-├── .gitlab-ci.yml       # Pipeline GitLab CI
-├── Dockerfile           # Multi-stage: build Node → serve NGINX
-├── docker-compose.yml   # Jalankan container di port 8080
-├── nginx.conf           # Konfigurasi NGINX (SPA fallback)
-├── vite.config.js       # Konfigurasi Vite (base: './')
-└── src/                 # Kode aplikasi React
-    ├── App.jsx          # Halaman utama
-    └── main.jsx         # Entry point React
+├── api/index.js          # Entry Vercel Function (mount server/app.js)
+├── vercel.json           # Rewrites: /api/* → function, sisanya → SPA
+├── server/               # Backend Express (CommonJS)
+│   ├── app.js            # Definisi app: middleware + routing API
+│   ├── index.js          # Entry lokal/Docker: static serving + listen
+│   ├── db.js             # Pool Postgres + initDB (migrasi ringan)
+│   ├── middleware/auth.js
+│   └── routes/           # auth, landing, scanner
+├── src/                  # Frontend React
+│   ├── App.jsx           # Hash router + guard auth
+│   ├── context/          # Auth, Theme, Landing (CMS state)
+│   ├── components/scanner/  # USBScanner, ScanResult, UserForm
+│   └── pages/            # Landing, Login, Register, Dashboard, Scanner
+├── Dockerfile            # Build frontend → Node runtime (API + statis)
+├── docker-compose.yml    # web + postgres
+└── render.yaml           # Blueprint Render
 ```
 
 > Last updated: 2026

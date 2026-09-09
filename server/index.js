@@ -1,33 +1,33 @@
-require('dotenv').config()
+const path = require('path')
 const express = require('express')
-const cors = require('cors')
-const { initDB } = require('./db')
-const authRoutes = require('./routes/auth')
-const landingRoutes = require('./routes/landing')
+require('dotenv').config({ path: path.join(__dirname, '.env') })
+const fs = require('fs')
+const { app, initDB } = require('./app')
 
-const app = express()
-const PORT = process.env.PORT || 3000
+// Number() menangani PORT kosong/"0"/bukan angka dari environment ambient
+const PORT = Number(process.env.PORT) || 3000
+const distPath = path.join(__dirname, '..', 'dist')
 
-app.use(cors())
-app.use(express.json())
-
-app.use('/api/auth', authRoutes)
-app.use('/api/landing', landingRoutes)
-
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' })
-})
+// Sajikan hasil build Vite bila ada (jalankan `npm run build` dulu)
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath))
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'))
+  })
+}
 
 async function start() {
   try {
     await initDB()
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`)
-    })
   } catch (err) {
-    console.error('Failed to start server:', err)
-    process.exit(1)
+    // Jangan crash saat DB belum siap (mis. docker-compose cold start);
+    // initDB dipanggil ulang otomatis di middleware pada tiap request.
+    console.error('Initial DB init failed (will retry on request):', err.message)
   }
+
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`)
+  })
 }
 
 start()

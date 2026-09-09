@@ -1,12 +1,25 @@
 const { Pool } = require('pg')
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'cicd_auth',
-})
+function createPool() {
+  if (process.env.DATABASE_URL) {
+    // Managed Postgres (Render/Neon/Supabase) requires TLS; allow sslmode=disable opt-out
+    const sslDisabled = /sslmode=disable/i.test(process.env.DATABASE_URL)
+    return new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ...(sslDisabled ? {} : { ssl: { rejectUnauthorized: false } }),
+    })
+  }
+
+  return new Pool({
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 5432,
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    database: process.env.DB_NAME || 'cicd_auth',
+  })
+}
+
+const pool = createPool()
 
 const defaultLandingContent = {
   hero: {
@@ -91,7 +104,16 @@ const defaultLandingContent = {
   },
 }
 
+let initPromise = null
+
 async function initDB() {
+  if (!initPromise) {
+    initPromise = doInitDB()
+  }
+  return initPromise
+}
+
+async function doInitDB() {
   const client = await pool.connect()
   try {
     await client.query(`
@@ -112,6 +134,16 @@ async function initDB() {
       )
     `)
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS scanner_items (
+        id VARCHAR(64) PRIMARY KEY,
+        nama VARCHAR(100) NOT NULL,
+        divisi VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
     for (const [section, content] of Object.entries(defaultLandingContent)) {
       await client.query(
         'INSERT INTO landing_content (section, content) VALUES ($1, $2) ON CONFLICT (section) DO NOTHING',
@@ -125,4 +157,4 @@ async function initDB() {
   }
 }
 
-module.exports = { pool, initDB }
+module.exports = { pool, initDB, defaultLandingContent }

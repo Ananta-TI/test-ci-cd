@@ -12,13 +12,21 @@ COPY . .
 RUN npm run build
 
 
-# Stage 2: Production
-FROM nginx:alpine
+# Stage 2: Production (Node + Express menyajikan API dan file statis)
+FROM node:20-alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production
 
-EXPOSE 80
+COPY package*.json ./
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN npm ci --omit=dev
+
+COPY server ./server
+
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
+CMD ["node", "server/index.js"]

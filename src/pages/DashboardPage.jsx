@@ -21,7 +21,7 @@ const sections = [
   { id: 'features', label: 'Features' },
   { id: 'steps', label: 'Steps' },
   { id: 'cta', label: 'CTA' },
-  { id: 'navbar', label: 'Navbar' },
+  { id: 'navbar', label: 'Navbar' },  
   { id: 'footer', label: 'Footer' },
 ]
 
@@ -305,22 +305,68 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              aria-label={`Ubah ke mode ${theme === 'dark' ? 'terang' : 'gelap'}`}
-              className="grid h-8 w-8 place-items-center rounded-full border border-line bg-canvas text-body transition-colors hover:text-ink"
-            >
-              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-            </button>
 
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-ink">{user?.name}</p>
-                <p className="text-xs text-body">{user?.email}</p>
-              </div>
-              <button onClick={logout} className="btn btn--ghost btn--sm">Keluar</button>
-            </div>
-          </div>
+  <button
+    onClick={() => {
+      window.location.hash = '#/scanner'
+    }}
+    className="
+      btn
+      btn--primary
+      btn--sm
+    "
+  >
+    Scanner
+  </button>
+
+
+  <button
+    onClick={toggleTheme}
+    aria-label={`Ubah ke mode ${theme === 'dark' ? 'terang' : 'gelap'}`}
+    className="
+      grid
+      h-8
+      w-8
+      place-items-center
+      rounded-full
+      border
+      border-line
+      bg-canvas
+      text-body
+      transition-colors
+      hover:text-ink
+    "
+  >
+    {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+  </button>
+
+
+  <div className="flex items-center gap-3">
+
+    <div className="text-right hidden sm:block">
+
+      <p className="text-sm font-medium text-ink">
+        {user?.name}
+      </p>
+
+      <p className="text-xs text-body">
+        {user?.email}
+      </p>
+
+    </div>
+
+
+    <button 
+      onClick={logout} 
+      className="btn btn--ghost btn--sm"
+    >
+      Keluar
+    </button>
+
+
+  </div>
+
+</div>
         </div>
       </header>
 

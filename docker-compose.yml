@@ -5,20 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: cicd-web
     ports:
-      - "8080:80"
-    depends_on:
-      - api
-    restart: unless-stopped
-
-  api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: cicd-api
-    ports:
-      - "3000:3000"
+      - "8080:3000"
     environment:
-      - PORT=3000
+      - NODE_ENV=production
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=postgres
@@ -38,7 +27,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=cicd_auth
     ports:
-      - "5432:5432"
+      - "5433:5432"   # host 5433 supaya tidak bentrok dengan Postgres native di 5432
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
